@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Mandate - Aláírás</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .card h2 {
+            font-size: 1.1em;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        .mandate-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .mandate-field:last-child {
+            border-bottom: none;
+        }
+        .mandate-label {
+            color: #888;
+        }
+        .mandate-value {
+            font-weight: 600;
+            text-align: right;
+        }
+        .mandate-value.highlight {
+            color: #4ade80;
+            font-size: 1.2em;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59,130,246,0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .status.connected {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .signature-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .hidden {
+            display: none;
+        }
+        .wallet-info {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .warning {
+            background: rgba(234, 179, 8, 0.2);
+            color: #fbbf24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧘 Zen Mandate</h1>
+        <p class="subtitle">EIP-712 Aláírás Rendszer</p>
+        
+        <div class="warning">
+            ⚠️ Ez egy teszt rendszer. Csak akkor írj alá, ha megbízol Zen-ben!
+        </div>
+
+        <div class="card">
+            <h2>📜 MANDATE RÉSZLETEI</h2>
+            <div class="mandate-field">
+                <span class="mandate-label">Engedélyező</span>
+                <span class="mandate-value" id="grantor">Te (wallet címed)</span>
+            </div>
+            <div class="mandate-field">
+                <span class="mandate-label">Kedvezményezett</span>
+                <span class="mandate-value">Zen</span>
+            </div>
+            <div class="mandate-field">
+                <span class="mandate-label">Maximum összeg</span>
+                <span class="mandate-value highlight" id="maxAmount">$5.00 USDC</span>
+            </div>
+            <div class="mandate-field">
+                <span class="mandate-label">Cél</span>
+                <span class="mandate-value" id="purpose">AP2 tesztelés</span>
+            </div>
+            <div class="mandate-field">
+                <span class="mandate-label">Érvényesség</span>
+                <span class="mandate-value" id="validity">24 óra</span>
+            </div>
+        </div>
+
+        <div id="step1">
+            <button class="btn btn-primary" id="connectBtn" onclick="connectWallet()">
+                🔗 Wallet Csatlakoztatása
+            </button>
+            <p class="wallet-info">Base App vagy Coinbase Wallet ajánlott</p>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div class="status connected">
+                ✅ Wallet csatlakoztatva: <span id="walletAddress"></span>
+            </div>
+            <button class="btn btn-primary" id="signBtn" onclick="signMandate()" style="margin-top: 20px;">
+                ✍️ Mandate Aláírása
+            </button>
+        </div>
+
+        <div id="step3" class="hidden">
+            <div class="status success">
+                ✅ Sikeresen aláírva!
+            </div>
+            <div class="card" style="margin-top: 20px;">
+                <h2>🔐 ALÁÍRÁS</h2>
+                <div class="signature-box" id="signatureBox"></div>
+                <button class="copy-btn" onclick="copySignature()">📋 Másolás</button>
+            </div>
+            <p class="wallet-info">
+                Küldd el ezt az aláírást Zen-nek Telegramon!
+            </p>
+        </div>
+
+        <div id="errorBox" class="status error hidden"></div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script>
+        // Configuration
+        const ZEN_ADDRESS = "0x95D8Eb255ee4bA3101595aAe4E3200d1f47b81d1";
+        const CHAIN_ID = 8453; // Base
+        
+        // Mandate parameters (can be customized via URL params)
+        const urlParams = new URLSearchParams(window.location.search);
+        const MANDATE_CONFIG = {
+            maxAmount: parseFloat(urlParams.get('amount')) || 5.00,
+            purpose: urlParams.get('purpose') || "AP2 tesztelés és kísérletek",
+            validHours: parseInt(urlParams.get('hours')) || 24
+        };
+
+        // Update UI with config
+        document.getElementById('maxAmount').textContent = `$${MANDATE_CONFIG.maxAmount.toFixed(2)} USDC`;
+        document.getElementById('purpose').textContent = MANDATE_CONFIG.purpose;
+        document.getElementById('validity').textContent = `${MANDATE_CONFIG.validHours} óra`;
+
+        // EIP-712 Domain
+        const domain = {
+            name: "ZenMandate",
+            version: "1",
+            chainId: CHAIN_ID,
+            verifyingContract: ZEN_ADDRESS
+        };
+
+        // EIP-712 Types
+        const types = {
+            Mandate: [
+                { name: "grantor", type: "address" },
+                { name: "grantee", type: "address" },
+                { name: "maxAmount", type: "uint256" },
+                { name: "purpose", type: "string" },
+                { name: "validUntil", type: "uint256" },
+                { name: "nonce", type: "uint256" }
+            ]
+        };
+
+        let provider, signer, userAddress;
+        let currentMandate, currentSignature;
+
+        async function connectWallet() {
+            const btn = document.getElementById('connectBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Csatlakozás...';
+            
+            try {
+                if (!window.ethereum) {
+                    throw new Error("Nincs wallet! Nyisd meg a Base App böngészőjében.");
+                }
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // Request account access
+                const accounts = await provider.send("eth_requestAccounts", []);
+                userAddress = accounts[0];
+                
+                // Check network
+                const network = await provider.getNetwork();
+                if (network.chainId !== CHAIN_ID) {
+                    // Try to switch to Base
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x2105' }] // 8453 in hex
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x2105',
+                                    chainName: 'Base',
+                                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                    rpcUrls: ['https://mainnet.base.org'],
+                                    blockExplorerUrls: ['https://basescan.org']
+                                }]
+                            });
+                        } else {
+                            throw switchError;
+                        }
+                    }
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                }
+
+                signer = provider.getSigner();
+                
+                // Update UI
+                document.getElementById('grantor').textContent = 
+                    userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                document.getElementById('walletAddress').textContent = 
+                    userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                
+            } catch (error) {
+                showError(error.message);
+                btn.disabled = false;
+                btn.textContent = '🔗 Wallet Csatlakoztatása';
+            }
+        }
+
+        async function signMandate() {
+            const btn = document.getElementById('signBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Aláírás...';
+            
+            try {
+                // Create mandate
+                const nonce = Date.now();
+                const validUntil = Math.floor(Date.now() / 1000) + (MANDATE_CONFIG.validHours * 3600);
+                
+                currentMandate = {
+                    grantor: userAddress,
+                    grantee: ZEN_ADDRESS,
+                    maxAmount: ethers.utils.parseUnits(MANDATE_CONFIG.maxAmount.toString(), 6).toString(),
+                    purpose: MANDATE_CONFIG.purpose,
+                    validUntil: validUntil,
+                    nonce: nonce
+                };
+
+                // Sign with EIP-712
+                currentSignature = await signer._signTypedData(domain, types, currentMandate);
+                
+                // Show result
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                
+                const result = {
+                    mandate: currentMandate,
+                    signature: currentSignature,
+                    signedAt: new Date().toISOString()
+                };
+                
+                document.getElementById('signatureBox').textContent = JSON.stringify(result, null, 2);
+                
+            } catch (error) {
+                showError(error.message);
+                btn.disabled = false;
+                btn.textContent = '✍️ Mandate Aláírása';
+            }
+        }
+
+        function copySignature() {
+            const result = {
+                mandate: currentMandate,
+                signature: currentSignature,
+                signedAt: new Date().toISOString()
+            };
+            navigator.clipboard.writeText(JSON.stringify(result));
+            
+            const btn = event.target;
+            btn.textContent = '✅ Másolva!';
+            setTimeout(() => btn.textContent = '📋 Másolás', 2000);
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.textContent = '❌ ' + message;
+            errorBox.classList.remove('hidden');
+            setTimeout(() => errorBox.classList.add('hidden'), 5000);
+        }
+    </script>
+</body>
+</html>
