@@ -168,15 +168,15 @@
             </div>
             <div class="mandate-field">
                 <span class="mandate-label">Maximum összeg</span>
-                <span class="mandate-value highlight" id="maxAmount">$5.00 USDC</span>
+                <span class="mandate-value highlight" id="maxAmount">$10.00 USDC</span>
             </div>
             <div class="mandate-field">
                 <span class="mandate-label">Cél</span>
-                <span class="mandate-value" id="purpose">AP2 tesztelés</span>
+                <span class="mandate-value" id="purpose">Simmer trading + autonóm kutatás</span>
             </div>
             <div class="mandate-field">
                 <span class="mandate-label">Érvényesség</span>
-                <span class="mandate-value" id="validity">24 óra</span>
+                <span class="mandate-value" id="validity">7 nap</span>
             </div>
         </div>
 
@@ -222,9 +222,9 @@
         // Mandate parameters (can be customized via URL params)
         const urlParams = new URLSearchParams(window.location.search);
         const MANDATE_CONFIG = {
-            maxAmount: parseFloat(urlParams.get('amount')) || 5.00,
-            purpose: urlParams.get('purpose') || "AP2 tesztelés és kísérletek",
-            validHours: parseInt(urlParams.get('hours')) || 24
+            maxAmount: parseFloat(urlParams.get('amount')) || 10.00,
+            purpose: urlParams.get('purpose') || "Simmer trading + autonóm kutatás",
+            validHours: parseInt(urlParams.get('hours')) || 168
         };
 
         // Update UI with config
